@@ -93,7 +93,7 @@
             }
 
             try {
-                const response = await fetch('http://localhost:3000/latest-file-data'); // Route pour obtenir les données du fichier 'dev'
+                const response = await fetch('https://zoundweogo-affectation.onrender.com/latest-file-data'); // Route pour obtenir les données du fichier 'dev'
                 if (!response.ok) {
                     throw new Error('Erreur lors de la récupération des données.');
                 }
