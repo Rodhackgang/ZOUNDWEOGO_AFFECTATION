@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Excel File</title>
+
+</head>
+
+<body>
+    <div class="container">
+        <h1>Importer un fichier Excel</h1>
+        <form id="uploadForm">
+            <input type="file" id="fileInput" name="file" accept=".xlsx, .xls">
+            <button type="submit">Télécharger</button>
+        </form>
+        <p id="responseMessage"></p>
+    </div>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f4f9;
+        }
+
+        .container {
+            text-align: center;
+            border: 1px solid #ddd;
+            padding: 20px;
+            border-radius: 5px;
+            background-color: #fff;
+        }
+
+        input[type="file"] {
+            margin-bottom: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #responseMessage {
+            margin-top: 20px;
+            font-size: 16px;
+        }
+    </style>
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                document.getElementById('responseMessage').textContent = 'Veuillez sélectionner un fichier.';
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const response = await fetch('http://localhost:3000/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error('Erreur lors du téléchargement du fichier.');
+                }
+
+                const data = await response.json();
+                document.getElementById('responseMessage').textContent = 'Fichier téléchargé avec succès !';
+
+                console.log('Données JSON reçues:', data);
+
+                // Optionnel : Afficher les données reçues
+                // document.getElementById('responseMessage').textContent += '\n' + JSON.stringify(data, null, 2);
+
+            } catch (error) {
+                console.error('Erreur:', error);
+                document.getElementById('responseMessage').textContent = 'Erreur lors du téléchargement du fichier.';
+            }
+        });
+
+    </script>
+</body>
+
+</html>
