@@ -1,0 +1,128 @@
+<style>
+    h1 {
+        color: #333;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    .search-container {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 20px;
+    }
+
+    #searchInput {
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        width: 80%;
+        font-size: 16px;
+    }
+
+    #searchButton {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        background: #007bff;
+        color: #fff;
+        font-size: 16px;
+        cursor: pointer;
+        margin-left: 10px;
+    }
+
+    #searchButton:hover {
+        background: #0056b3;
+    }
+
+    .results-container {
+        border-top: 1px solid #ddd;
+        padding-top: 10px;
+    }
+
+    .result-item {
+        margin-bottom: 10px;
+    }
+
+    .result-item p {
+        margin: 5px 0;
+        font-size: 16px;
+    }
+</style>
+
+<div class="container">
+    <h1>Affectation des élèves (6ème &amp; 2nd) ZOUNDWEOGO</h1>
+    <div class="search-container">
+        <input type="text" id="searchInput" placeholder="Rechercher par Nom et Prénom...">
+        <button id="searchButton">Chercher</button>
+    </div>
+    <div id="resultsContainer" class="results-container"></div>
+</div>
+<script>
+  let isThrottled = false;  // Flag pour éviter les recherches répétées
+
+document.getElementById('searchButton').addEventListener('click', async () => {
+    if (isThrottled) {
+        alert('Veuillez attendre un moment avant de faire une nouvelle recherche.');
+        return;
+    }
+
+    const searchInput = document.getElementById('searchInput').value.trim().toLowerCase();
+    if (!searchInput) {
+        alert('Veuillez entrer un terme de recherche.');
+        return;
+    }
+
+    isThrottled = true;  // Activer le throttling
+
+    try {
+        const response = await fetch('https://zoundweogoaffectation.up.railway.app/latest-file-data');
+        if (!response.ok) {
+            throw new Error('Erreur lors de la récupération des données.');
+        }
+
+        const data = await response.json();
+        const resultsContainer = document.getElementById('resultsContainer');
+        resultsContainer.innerHTML = '';
+
+        const searchTerms = searchInput.split(' ');
+
+        const results = data.filter(item => {
+            return searchTerms.every(term =>
+                (item["Nom"] && item["Nom"].toLowerCase().includes(term)) ||
+                (item["Prenom(s)"] && item["Prenom(s)"].toLowerCase().includes(term))
+            );
+        });
+
+        if (results.length === 0) {
+            resultsContainer.innerHTML = `<p>Aucun résultat trouvé pour "${searchInput}".</p>`;
+            return;
+        }
+
+        results.forEach(item => {
+            const resultItem = document.createElement('div');
+            resultItem.className = 'result-item';
+            resultItem.innerHTML = `
+                <p><strong>Numero PV:</strong> ${item['N°PV '] || 'N/A'}</p>
+                <p><strong>Nom:</strong> ${item['Nom'] || 'N/A'}</p>
+                <p><strong>Prénom(s):</strong> ${item['Prenom(s)'] || 'N/A'}</p>
+                <p><strong>Sexe:</strong> ${item['Sexe'] || 'N/A'}</p>
+                <p><strong>Date Naissance:</strong> ${item['Date Naissance'] || 'N/A'}</p>
+        
+                <p><strong>Ecole:</strong> ${item['Ecole'] || 'N/A'}</p>
+                <p><strong>Établissement d'affectation:</strong> ${item["Établissement d'affectation "] || 'N/A'}</p>
+            `;
+            resultsContainer.appendChild(resultItem);
+        });
+
+    } catch (error) {
+        console.error('Erreur:', error);
+        alert('Erreur lors de la recherche.');
+    } finally {
+        // Délai avant de permettre une nouvelle recherche (5 secondes)
+        setTimeout(() => {
+            isThrottled = false;
+        }, 5000);
+    }
+});
+
+</script>
