@@ -85,8 +85,8 @@
         <div id="resultsContainer" class="results-container"></div>
     </div>
     <script>
-        document.getElementById('searchButton').addEventListener('click', async () => {
-    const searchInput = document.getElementById('searchInput').value.trim().toLowerCase();
+      document.getElementById('searchButton').addEventListener('click', async () => {
+    const searchInput = document.getElementById('searchInput').value.trim().toLowerCase(); // On convertit la recherche en minuscules
     if (!searchInput) {
         alert('Veuillez entrer un terme de recherche.');
         return;
@@ -103,10 +103,10 @@
         const resultsContainer = document.getElementById('resultsContainer');
         resultsContainer.innerHTML = ''; // Effacer les résultats précédents
 
-        // Recherche des données par combinaison Nom et Prenom
+        // Recherche des données par combinaison Nom et Prénom, on convertit en minuscules pour la comparaison
         const results = data.filter(item => {
             const fullName = `${item['Nom'] || ''} ${item['Prenom(s)'] || ''}`.trim().toLowerCase();
-            return fullName.includes(searchInput);
+            return fullName.includes(searchInput); // On vérifie si la chaîne de recherche est incluse
         });
 
         if (results.length === 0) {
@@ -136,6 +136,7 @@
         alert('Erreur lors de la recherche.');
     }
 });
+
 
     </script>
 </body>
