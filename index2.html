@@ -86,57 +86,57 @@
     </div>
     <script>
         document.getElementById('searchButton').addEventListener('click', async () => {
-            const searchInput = document.getElementById('searchInput').value.trim().toLowerCase();
-            if (!searchInput) {
-                alert('Veuillez entrer un terme de recherche.');
-                return;
-            }
+    const searchInput = document.getElementById('searchInput').value.trim().toLowerCase();
+    if (!searchInput) {
+        alert('Veuillez entrer un terme de recherche.');
+        return;
+    }
 
-            try {
-                const response = await fetch('https://zoundweogo-affectation.onrender.com/latest-file-data'); // Route pour obtenir les données du fichier 'dev'
-                if (!response.ok) {
-                    throw new Error('Erreur lors de la récupération des données.');
-                }
+    try {
+        const response = await fetch('https://zoundweogo-affectation.onrender.com/latest-file-data'); // Route pour obtenir les données du fichier 'dev'
+        if (!response.ok) {
+            throw new Error('Erreur lors de la récupération des données.');
+        }
 
-                const data = await response.json();
-                console.log('Données reçues:', data); // Affiche les données pour débogage
-                const resultsContainer = document.getElementById('resultsContainer');
-                resultsContainer.innerHTML = ''; // Clear previous results
+        const data = await response.json();
+        console.log('Données reçues:', data); // Affiche les données pour débogage
+        const resultsContainer = document.getElementById('resultsContainer');
+        resultsContainer.innerHTML = ''; // Effacer les résultats précédents
 
-                // Recherche des données
-                const results = data.filter(item => {
-                    return Object.values(item).some(value =>
-                        value && value.toString().toLowerCase().includes(searchInput)
-                    );
-                });
-
-                if (results.length === 0) {
-                    resultsContainer.innerHTML = '<p>Aucun résultat trouvé.</p>';
-                    return;
-                }
-
-                // Affichage des résultats
-                results.forEach(item => {
-                    const resultItem = document.createElement('div');
-                    resultItem.className = 'result-item';
-                    resultItem.innerHTML = `
-                        <p><strong>N°PV:</strong> ${item['N°PV'] || 'N/A'}</p>
-                        <p><strong>Nom:</strong> ${item['Nom'] || 'N/A'}</p>
-                        <p><strong>Prénom(s):</strong> ${item['Prenom(s)'] || 'N/A'}</p>
-                        <p><strong>Sexe:</strong> ${item['Sexe'] || 'N/A'}</p>
-                        <p><strong>Date Naissance:</strong> ${item['Date Naissance'] || 'N/A'}</p>
-                        <p><strong>Lieu Naissance:</strong> ${item['Lieu Naissance'] || 'N/A'}</p>
-                        <p><strong>Ecole:</strong> ${item['Ecole'] || 'N/A'}</p>
-                        <p><strong>Établissement d'affectation:</strong> ${item["Établissement d'affectation "] || 'N/A'}</p>
-                    `;
-                    resultsContainer.appendChild(resultItem);
-                });
-
-            } catch (error) {
-                console.error('Erreur:', error);
-                alert('Erreur lors de la recherche.');
-            }
+        // Recherche des données par combinaison Nom et Prenom
+        const results = data.filter(item => {
+            const fullName = `${item['Nom'] || ''} ${item['Prenom(s)'] || ''}`.trim().toLowerCase();
+            return fullName.includes(searchInput);
         });
+
+        if (results.length === 0) {
+            resultsContainer.innerHTML = '<p>Aucun résultat trouvé.</p>';
+            return;
+        }
+
+        // Affichage des résultats
+        results.forEach(item => {
+            const resultItem = document.createElement('div');
+            resultItem.className = 'result-item';
+            resultItem.innerHTML = `
+                <p><strong>N°PV:</strong> ${item['N°PV'] || 'N/A'}</p>
+                <p><strong>Nom:</strong> ${item['Nom'] || 'N/A'}</p>
+                <p><strong>Prénom(s):</strong> ${item['Prenom(s)'] || 'N/A'}</p>
+                <p><strong>Sexe:</strong> ${item['Sexe'] || 'N/A'}</p>
+                <p><strong>Date Naissance:</strong> ${item['Date Naissance'] || 'N/A'}</p>
+                <p><strong>Lieu Naissance:</strong> ${item['Lieu Naissance'] || 'N/A'}</p>
+                <p><strong>Ecole:</strong> ${item['Ecole'] || 'N/A'}</p>
+                <p><strong>Établissement d'affectation:</strong> ${item["Établissement d'affectation "] || 'N/A'}</p>
+            `;
+            resultsContainer.appendChild(resultItem);
+        });
+
+    } catch (error) {
+        console.error('Erreur:', error);
+        alert('Erreur lors de la recherche.');
+    }
+});
+
     </script>
 </body>
 </html>
