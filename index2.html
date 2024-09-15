@@ -8,7 +8,7 @@
     <style>
         body {
             font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #f0f0f5 0%, #e0e0eb 100%);
+            background: #f0f0f5;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -18,42 +18,40 @@
 
         .container {
             background: #fff;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            max-width: 700px;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
             width: 100%;
         }
 
         h1 {
             color: #333;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
             text-align: center;
-            font-size: 28px;
         }
 
         .search-container {
             display: flex;
             justify-content: center;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
 
         #searchInput {
-            padding: 12px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            width: 70%;
-            font-size: 18px;
-            outline: none;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 80%;
+            font-size: 16px;
         }
 
         #searchButton {
-            padding: 12px 25px;
+            padding: 10px 20px;
             border: none;
-            border-radius: 6px;
+            border-radius: 4px;
             background: #007bff;
             color: #fff;
-            font-size: 18px;
+            font-size: 16px;
             cursor: pointer;
             margin-left: 10px;
         }
@@ -64,27 +62,16 @@
 
         .results-container {
             border-top: 1px solid #ddd;
-            padding-top: 15px;
-            max-height: 400px;
-            overflow-y: auto;
+            padding-top: 10px;
         }
 
         .result-item {
-            margin-bottom: 20px;
-            padding: 10px;
-            background: #f9f9f9;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            margin-bottom: 10px;
         }
 
         .result-item p {
-            margin: 8px 0;
+            margin: 5px 0;
             font-size: 16px;
-            color: #333;
-        }
-
-        .result-item p strong {
-            color: #007bff;
         }
     </style>
 </head>
@@ -92,7 +79,7 @@
     <div class="container">
         <h1>Affectation Zoundweogo</h1>
         <div class="search-container">
-            <input type="text" id="searchInput" placeholder="Rechercher par nom ou prénom...">
+            <input type="text" id="searchInput" placeholder="Rechercher...">
             <button id="searchButton">Chercher</button>
         </div>
         <div id="resultsContainer" class="results-container"></div>
@@ -106,21 +93,21 @@
             }
 
             try {
-                const response = await fetch('https://zoundweogo-affectation.onrender.com/latest-file-data');
+                const response = await fetch('https://zoundweogo-affectation.onrender.com/latest-file-data'); // Route pour obtenir les données du fichier 'dev'
                 if (!response.ok) {
                     throw new Error('Erreur lors de la récupération des données.');
                 }
 
                 const data = await response.json();
-                console.log('Données reçues:', data);
+                console.log('Données reçues:', data); // Affiche les données pour débogage
                 const resultsContainer = document.getElementById('resultsContainer');
                 resultsContainer.innerHTML = ''; // Clear previous results
 
-                // Recherche par nom ou prénom
+                // Recherche des données
                 const results = data.filter(item => {
-                    const nom = item['Nom'] ? item['Nom'].toLowerCase() : '';
-                    const prenom = item['Prenom(s)'] ? item['Prenom(s)'].toLowerCase() : '';
-                    return nom.includes(searchInput) || prenom.includes(searchInput);
+                    return Object.values(item).some(value =>
+                        value && value.toString().toLowerCase().includes(searchInput)
+                    );
                 });
 
                 if (results.length === 0) {
