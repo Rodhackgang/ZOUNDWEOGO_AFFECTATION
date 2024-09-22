@@ -28,10 +28,9 @@
 
 .card {
     border: 1px solid #ccc;
-    border-radius: 8px;
-    padding: 16px;
+    border-radius: 5px;
     margin: 10px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    padding: 10px;
 }
 
 .card-title {
@@ -44,18 +43,56 @@
     color: blue;
 }
 
-.revelation-place,
-.verse-count {
+.revelation-place, .verse-count {
     margin-top: 5px;
 }
 
 .button {
     background-color: #2196F3;
-    padding: 10px;
-    border-radius: 5px;
     color: white;
+    padding: 10px;
     text-align: center;
+    cursor: pointer;
+    border-radius: 5px;
     margin-top: 10px;
+}
+
+.modal {
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background-color: #fff;
+    margin: 15px;
+    padding: 20px;
+    border: 1px solid #888;
+    border-radius: 5px;
+    width: 80%;
+    max-width: 600px;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
     cursor: pointer;
 }
 
@@ -65,6 +102,10 @@
     const app = document.getElementById("app");
     let loading = true;
     const quranData = [];
+    const modal = document.createElement('div');
+    modal.classList.add('modal');
+    modal.style.display = 'none'; // Cacher le modal au départ
+    document.body.appendChild(modal);
 
     const fetchQuran = async () => {
         try {
@@ -97,15 +138,48 @@
                 <div class="surah-name-arabic">${surah.surahNameArabic}</div>
                 <div class="revelation-place">Lieu de révélation : ${surah.revelationPlace}</div>
                 <div class="verse-count">Nombre de versets : ${surah.totalAyah}</div>
-                <div class="button" onclick="redirectToSurah(${surah.surahNo}, 1)">En savoir plus</div>
+                <div class="button" onclick="showVerses(${surah.surahNo})">En savoir plus</div>
             </div>
         `).join('');
         
         app.innerHTML = cards;
     };
 
-    const redirectToSurah = (surahNo, ayahNo) => {
-        window.location.href = `https://zoundweogoaffectation.up.railway.app?surahNo=${surahNo}&ayahNo=${ayahNo}`;
+    const showVerses = async (surahNo) => {
+        const verses = await fetchVerses(surahNo);
+        renderModal(verses);
+        modal.style.display = 'block'; // Afficher le modal
+    };
+
+    const fetchVerses = async (surahNo) => {
+        try {
+            const response = await fetch(`https://quranapi.pages.dev/api/${surahNo}.json`);
+            const data = await response.json();
+            return data; // Retourner les versets
+        } catch (error) {
+            console.error('Error fetching verses:', error);
+        }
+    };
+
+    const renderModal = (verses) => {
+        modal.innerHTML = `
+            <div class="modal-content">
+                <span class="close" onclick="closeModal()">&times;</span>
+                <h2>Détails des versets</h2>
+                ${verses.map(verse => `
+                    <div class="verse">
+                        <strong>Verset ${verse.ayahNo}:</strong>
+                        <p>${verse.english}</p>
+                        <p>${verse.arabic1}</p>
+                        <p>${verse.arabic2}</p>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    };
+
+    window.closeModal = () => {
+        modal.style.display = 'none'; // Fermer le modal
     };
 
     const render = () => {
