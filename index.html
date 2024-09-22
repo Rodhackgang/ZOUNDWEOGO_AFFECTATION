@@ -3,59 +3,120 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Détails du Verset</title>
+    <title>Détails de la Sourate</title>
     <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+
+        .verse {
+            margin: 10px 0;
+            padding: 10px;
+            background-color: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+        }
+
+        .audio-link {
+            display: inline-block;
+            margin-top: 5px;
+            background-color: #2196F3;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            text-decoration: none;
+        }
+
+        .audio-link:hover {
+            background-color: #1976D2;
+        }
+
+        #translateButton {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+
+        #translateButton:hover {
+            background-color: #45a049;
+        }
+    </style>
 </head>
 <body>
-    <div id="details"></div>
-    <script src="details.js" defer></script>
+    <button id="translateButton">Traduire en français</button>
+    <div id="app"></div>
+    <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+            const app = document.getElementById("app");
+            const urlParams = new URLSearchParams(window.location.search);
+            const surahNo = urlParams.get('surahNo');
+
+            try {
+                // Récupérer les détails de la sourate
+                const surahResponse = await fetch(`https://quranapi.pages.dev/api/${surahNo}.json`);
+                const surah = await surahResponse.json();
+
+                // Récupérer les versets et audio
+                const verses = surah.arabic2; // Liste des versets en arabe
+                const frenchVerses = surah.english; // Traduction en anglais
+                const totalAyah = surah.totalAyah;
+
+                // Créer les éléments de versets
+                let versesHTML = '';
+                for (let i = 0; i < totalAyah; i++) {
+                    const verseNumber = i + 1;
+                    versesHTML += `
+                        <div class="verse">
+                            <div><strong>Verset ${verseNumber} :</strong></div>
+                            <div>${verses[i]}</div>
+                            <div class="french-text">${frenchVerses[i]}</div>
+                            <a class="audio-link" href="https://quranaudio.pages.dev/1/${surahNo}_${verseNumber}.mp3">Écouter</a>
+                            <a class="audio-link" href="https://quranaudio.pages.dev/2/${surahNo}_${verseNumber}.mp3">Écouter (Abu Bakr)</a>
+                        </div>
+                    `;
+                }
+
+                app.innerHTML = `
+                    <h1>${surah.surahName} (${surah.surahNameTranslation})</h1>
+                    <p>Lieu de révélation : ${surah.revelationPlace}</p>
+                    <p>Nombre de versets : ${totalAyah}</p>
+                    ${versesHTML}
+                `;
+
+                // Traduire les textes en français par défaut
+                await translateVerses();
+            } catch (error) {
+                console.error('Erreur lors de la récupération des données de la sourate:', error);
+                app.innerHTML = '<p>Erreur lors de la récupération des données.</p>';
+            }
+        });
+
+        async function translateVerses() {
+            const frenchVerses = document.querySelectorAll('.verse .french-text'); // Sélectionne les traductions en anglais
+           
+            for (let verse of frenchVerses) {
+                const textToTranslate = verse.textContent;
+                try {
+                    const response = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(textToTranslate)}&langpair=en|fr`);
+                    const data = await response.json();
+                    if (data.responseData && data.responseData.translatedText) {
+                        verse.textContent = data.responseData.translatedText; // Remplace le texte par la traduction
+                    }
+                } catch (error) {
+                    console.error('Erreur de traduction:', error);
+                }
+            }
+        }
+
+        document.getElementById('translateButton').addEventListener('click', translateVerses);
+    </script>
 </body>
 </html>
-<style>
-    
-</style>
-<script>
-    document.addEventListener("DOMContentLoaded", () => {
-    const detailsDiv = document.getElementById("details");
-
-    const params = new URLSearchParams(window.location.search);
-    const surahNo = params.get('surahNo');
-    const ayahNo = params.get('ayahNo');
-
-    const fetchAyahDetails = async () => {
-        try {
-            const response = await fetch(`https://quranapi.pages.dev/api/${surahNo}/${ayahNo}.json`);
-            const data = await response.json();
-            renderDetails(data);
-        } catch (error) {
-            console.error('Error fetching Ayah details:', error);
-            detailsDiv.innerHTML = "<p>Erreur lors du chargement des détails.</p>";
-        }
-    };
-
-    const renderDetails = (data) => {
-        detailsDiv.innerHTML = `
-            <div class="card">
-                <h2>${data.surahName} (${data.surahNameTranslation})</h2>
-                <div class="surah-name-arabic">${data.surahNameArabic}</div>
-                <div class="revelation-place">Lieu de révélation : ${data.revelationPlace}</div>
-                <div class="verse-count">Nombre de versets : ${data.totalAyah}</div>
-                <div class="ayah-text">
-                    <p><strong>Ayah ${data.ayahNo}:</strong> ${data.english}</p>
-                    <p>${data.arabic1}</p>
-                    <p>${data.arabic2}</p>
-                </div>
-                <h3>Audio</h3>
-                <div>
-                    ${Object.entries(data.audio).map(([key, value]) => `
-                        <p>${value.reciter}: <a href="${value.url}" target="_blank">Écouter</a></p>
-                    `).join('')}
-                </div>
-            </div>
-        `;
-    };
-
-    fetchAyahDetails();
-});
-
-</script>
