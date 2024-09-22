@@ -97,15 +97,15 @@
                 <div class="surah-name-arabic">${surah.surahNameArabic}</div>
                 <div class="revelation-place">Lieu de révélation : ${surah.revelationPlace}</div>
                 <div class="verse-count">Nombre de versets : ${surah.totalAyah}</div>
-                <div class="button" onclick="showVerses(${surah.surahId})">En savoir plus</div>
+                <div class="button" onclick="redirectToSurah(${surah.surahNo}, 1)">En savoir plus</div>
             </div>
         `).join('');
         
         app.innerHTML = cards;
     };
 
-    const showVerses = (surahId) => {
-        alert(`Afficher les versets de la sourate ${surahId}`); // Remplacer par la logique pour afficher les versets
+    const redirectToSurah = (surahNo, ayahNo) => {
+        window.location.href = `index.html?surahNo=${surahNo}&ayahNo=${ayahNo}`;
     };
 
     const render = () => {
